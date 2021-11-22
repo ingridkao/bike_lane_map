@@ -1,21 +1,63 @@
-<script setup>
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
-import HelloWorld from './components/HelloWorld.vue'
+<script>
+import {defineComponent } from 'vue'
+import LandingPage from "@/components/LandingPage.vue"
+import BikeMap from "@/components/BikeMap.vue"
+
+export default defineComponent({
+  data(){
+    return {
+      gettingLocation: false,
+      cityToggle: false
+    }
+  },
+  created(){
+    window.addEventListener("resize", this.detectWindowWidth);
+    this.checkGeoLocation()
+  },
+  destroyed(){
+    window.removeEventListener("resize", this.detectWindowWidth);
+  },
+    components: {LandingPage, BikeMap},
+  methods: {
+    detectWindowWidth(){
+      this.$store.commit("detectWidth", window.innerWidth)
+    },
+    checkGeoLocation(){
+      if ("geolocation" in navigator) {
+        /* geolocation is available */
+          navigator.geolocation.getCurrentPosition(pos => {
+            if(pos && pos.coords){
+              this.gettingLocation = true
+              this.$store.commit("setGeoLocation", pos.coords)
+              console.log(pos.coords);
+            }
+          }, err => {
+            console.log(err.message);
+          })
+      } else {
+        /* geolocation IS NOT available */
+        console.log('geolocation IS NOT available')
+        this.gettingLocation = false
+      }
+    },
+  }
+})
 </script>
 
 <template>
-  <img alt="Vue logo" src="./assets/logo.png" />
-  <HelloWorld msg="Hello Vue 3 + Vite" />
+  <div v-cloak id="mainPage" >
+    <LandingPage/>
+    <BikeMap/>
+  </div>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+<style lang="scss">
+  [v-cloak]{
+    display: none;
+  }
+  #mainPage{
+    // display: flex;
+    // flex-wrap: wrap;
+    height: 100vh;
+  }
 </style>
